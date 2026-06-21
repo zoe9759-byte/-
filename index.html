@@ -4,18 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>任务系统</title>
+<script>
+  var SUPABASE_URL = 'https://yuqybjmblfbsetonscpw.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_eWbi7mPvi6gIWHkIxGiWug_ICFsG3oW';
+</script>
 <style>
   :root {
-    --bg:#F7F6F3; --surface:#FFFFFF; --border:rgba(0,0,0,0.08); --border-strong:rgba(0,0,0,0.15);
-    --text:#1A1A1A; --text-secondary:#6B6B6B; --text-tertiary:#A0A0A0; --accent:#2D2D2D;
-    --red:#E24B4A; --red-bg:#FCEBEB; --red-text:#A32D2D;
-    --amber:#EF9F27; --amber-bg:#FAEEDA; --amber-text:#854F0B;
-    --blue:#378ADD; --blue-bg:#E6F1FB; --blue-text:#185FA5;
-    --gray-bg:#F1EFE8; --gray-text:#5F5E5A;
-    --teal-bg:#E1F5EE; --teal-text:#085041;
-    --coral-bg:#FAECE7; --coral-text:#712B13;
-    --green-bg:#EAF3DE; --green-text:#3B6D11;
-    --radius:10px; --radius-sm:6px;
+    --bg:#FFF0E4; --surface:#FFF7F0; --border:rgba(0,121,121,0.14); --border-strong:rgba(0,121,121,0.28);
+    --text:#003F3F; --text-secondary:#4D8A8A; --text-tertiary:#8FBDBD; --accent:#007979;
+    --red:#E0786A; --red-bg:#FBE9E3; --red-text:#A8503C;
+    --amber:#E8A659; --amber-bg:#FFE0C5; --amber-text:#8C5226;
+    --blue:#7FA8A0; --blue-bg:#E9F2EE; --blue-text:#4D7A70;
+    --gray-bg:#F3EBE2; --gray-text:#8A7666;
+    --teal-bg:#E6F0E3; --teal-text:#5C7D52;
+    --coral-bg:#FBE5DD; --coral-text:#B3603E;
+    --green-bg:#EEF2E3; --green-text:#73854F;
+    --radius:14px; --radius-sm:9px;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;min-height:100vh;}
@@ -48,13 +52,13 @@
   .capacity-bar-fill{height:6px;border-radius:3px;transition:width 0.3s,background 0.3s;}
   .capacity-text{font-size:12px;color:var(--text-secondary);margin-top:4px;}
 
-  .today-pick{background:#1A1A1A;border-radius:var(--radius);padding:18px 22px;margin-bottom:20px;color:#fff;}
+  .today-pick{background:linear-gradient(135deg,#007979 0%,#24B1B1 100%);border-radius:var(--radius);padding:18px 22px;margin-bottom:20px;color:#fff;}
   .today-pick h3{font-size:12px;font-weight:500;opacity:0.5;margin-bottom:12px;letter-spacing:0.05em;text-transform:uppercase;}
   .today-slots{display:flex;flex-direction:column;gap:6px;}
-  .today-slot{background:rgba(255,255,255,0.07);border-radius:var(--radius-sm);padding:9px 14px;font-size:14px;display:flex;align-items:center;gap:10px;}
+  .today-slot{background:rgba(255,255,255,0.16);border-radius:var(--radius-sm);padding:9px 14px;font-size:14px;display:flex;align-items:center;gap:10px;}
   .today-slot .slot-num{font-size:12px;opacity:0.4;min-width:16px;}
   .today-slot .slot-hrs{font-size:11px;opacity:0.5;margin-left:auto;}
-  .today-slot.overflow{background:rgba(226,75,74,0.15);}
+  .today-slot.overflow{background:rgba(224,120,106,0.15);}
   .today-slot.empty{opacity:0.35;font-style:italic;}
 
   .section-divider{font-size:12px;font-weight:600;color:var(--text-tertiary);letter-spacing:0.06em;text-transform:uppercase;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
@@ -109,6 +113,10 @@
   .pill-opt{padding:6px 13px;border-radius:18px;border:1px solid var(--border-strong);font-size:13px;cursor:pointer;color:var(--text-secondary);background:var(--surface);transition:all 0.1s;user-select:none;}
   .pill-opt:hover{border-color:var(--accent);color:var(--text);}
   .pill-opt.sel{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .sync-badge{font-size:11px;margin-left:6px;}
+  .sync-badge.sync-syncing{color:var(--text-tertiary);}
+  .sync-badge.sync-synced{color:#5C8A6B;}
+  .sync-badge.sync-error{color:var(--red-text);}
   .alloc-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;}
   .alloc-panel h3{font-size:12px;font-weight:600;color:var(--text-tertiary);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
   .alloc-edit-btn{font-size:11px;color:var(--blue-text);cursor:pointer;font-weight:400;letter-spacing:0;}
@@ -156,27 +164,20 @@
     </div>
     <div class="sidebar-title">客户</div>
     <div class="nav-item" onclick="filterClient('日慈')" id="nav-日慈">
-      <span class="client-dot" style="background:#E24B4A"></span> 日慈
+      <span class="client-dot" style="background:#C2693F"></span> 日慈
       <span class="count" id="count-日慈">0</span>
     </div>
     <div class="nav-item" onclick="filterClient('具尔')" id="nav-具尔">
-      <span class="client-dot" style="background:#378ADD"></span> 具尔
+      <span class="client-dot" style="background:#7FA8A0"></span> 具尔
       <span class="count" id="count-具尔">0</span>
     </div>
     <div class="nav-item" onclick="filterClient('同语')" id="nav-同语">
-      <span class="client-dot" style="background:#1D9E75"></span> 同语
+      <span class="client-dot" style="background:#8FA876"></span> 同语
       <span class="count" id="count-同语">0</span>
     </div>
     <div class="nav-item" onclick="filterClient('个人')" id="nav-个人">
-      <span class="client-dot" style="background:#888780"></span> 个人
+      <span class="client-dot" style="background:#A89684"></span> 个人
       <span class="count" id="count-个人">0</span>
-    </div>
-    <div class="sidebar-title" style="margin-top:auto;padding-top:16px">数据</div>
-    <div class="nav-item" onclick="exportData()">
-      <span>↓</span> 导出备份
-    </div>
-    <div class="nav-item" onclick="openPasteModal()">
-      <span>↑</span> 导入备份
     </div>
     <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)"/>
   </aside>
@@ -186,7 +187,7 @@
       <div class="page-header">
         <div>
           <div class="page-title" id="today-date"></div>
-          <div class="page-sub">DDL优先 · 同级按重要性排序</div>
+          <div class="page-sub">DDL优先 · 同级按重要性排序 <span id="sync-badge" class="sync-badge"></span></div>
         </div>
         <button class="btn btn-primary" onclick="openAdd()">+ 录入任务</button>
       </div>
@@ -195,8 +196,8 @@
         <h3>精力分配 <span class="alloc-edit-btn" onclick="openTargetModal()">设置目标占比 →</span></h3>
         <div id="alloc-rows"></div>
         <div class="alloc-legend">
-          <span><div class="legend-line" style="background:#2D2D2D"></div> 当前占比（按工时）</span>
-          <span><div class="legend-line" style="background:#2D2D2D;opacity:0.35"></div> 目标占比</span>
+          <span><div class="legend-line" style="background:var(--accent)"></div> 当前占比（按工时）</span>
+          <span><div class="legend-line" style="background:var(--accent);opacity:0.35"></div> 目标占比</span>
         </div>
       </div>
 
@@ -319,22 +320,22 @@
     <div class="modal-title">设置目标精力占比</div>
     <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">四项加起来应该等于100%</div>
     <div class="target-row">
-      <label><span class="client-dot" style="background:#E24B4A"></span>日慈</label>
+      <label><span class="client-dot" style="background:#C2693F"></span>日慈</label>
       <input type="range" min="0" max="100" step="5" id="tr-日慈" oninput="updateTargetPct()"/>
       <span class="pct" id="tp-日慈">20%</span>
     </div>
     <div class="target-row">
-      <label><span class="client-dot" style="background:#378ADD"></span>具尔</label>
+      <label><span class="client-dot" style="background:#7FA8A0"></span>具尔</label>
       <input type="range" min="0" max="100" step="5" id="tr-具尔" oninput="updateTargetPct()"/>
       <span class="pct" id="tp-具尔">40%</span>
     </div>
     <div class="target-row">
-      <label><span class="client-dot" style="background:#1D9E75"></span>同语</label>
+      <label><span class="client-dot" style="background:#8FA876"></span>同语</label>
       <input type="range" min="0" max="100" step="5" id="tr-同语" oninput="updateTargetPct()"/>
       <span class="pct" id="tp-同语">30%</span>
     </div>
     <div class="target-row">
-      <label><span class="client-dot" style="background:#888780"></span>个人</label>
+      <label><span class="client-dot" style="background:#A89684"></span>个人</label>
       <input type="range" min="0" max="100" step="5" id="tr-个人" oninput="updateTargetPct()"/>
       <span class="pct" id="tp-个人">10%</span>
     </div>
@@ -408,10 +409,10 @@ var currentFilter = 'all';
 var formVals = { client:'', q1:'', q2:'', q3:'', q4:'' };
 
 var CLIENTS = [
-  { name:'日慈', color:'#E24B4A' },
-  { name:'具尔', color:'#378ADD' },
-  { name:'同语', color:'#1D9E75' },
-  { name:'个人', color:'#888780' }
+  { name:'日慈', color:'#C2693F' },
+  { name:'具尔', color:'#7FA8A0' },
+  { name:'同语', color:'#8FA876' },
+  { name:'个人', color:'#A89684' }
 ];
 var DEFAULT_TARGETS = { '日慈':20, '具尔':40, '同语':30, '个人':10 };
 
@@ -447,6 +448,7 @@ function saveTargets() {
   CLIENTS.forEach(function(c) { obj[c.name] = parseInt(document.getElementById('tr-' + c.name).value, 10); total += obj[c.name]; });
   if (total !== 100) { alert('合计必须等于100%，当前是' + total + '%'); return; }
   saveTargetsData(obj);
+  pushToCloud();
   closeTargetModal();
   renderAll();
 }
@@ -479,15 +481,110 @@ function renderAllocPanel() {
   document.getElementById('alloc-rows').innerHTML = html;
 }
 
+var SYNC_ROW_ID = 'main';
+var _syncing = false;
+var _syncStatus = 'idle'; // idle | syncing | synced | error | offline
+
+function supaHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Prefer': 'resolution=merge-duplicates'
+  };
+}
+
+function updateSyncBadge(status) {
+  _syncStatus = status;
+  var el = document.getElementById('sync-badge');
+  if (!el) return;
+  var map = {
+    idle: { text: '', cls: '' },
+    syncing: { text: '同步中…', cls: 'sync-syncing' },
+    synced: { text: '已同步', cls: 'sync-synced' },
+    error: { text: '同步失败，仅本地保存', cls: 'sync-error' },
+    offline: { text: '离线，仅本地保存', cls: 'sync-error' }
+  };
+  var m = map[status] || map.idle;
+  el.textContent = m.text;
+  el.className = 'sync-badge ' + m.cls;
+}
+
 function loadTasks() {
   try { tasks = JSON.parse(localStorage.getItem('tf_tasks') || '[]'); } catch(e) { tasks = []; }
 }
-function saveTasks() { localStorage.setItem('tf_tasks', JSON.stringify(tasks)); }
+
+function saveTasks() {
+  // 本地优先：立即写localStorage，保证操作不卡顿
+  localStorage.setItem('tf_tasks', JSON.stringify(tasks));
+  pushToCloud();
+}
+
+function pushToCloud() {
+  if (!navigator.onLine) { updateSyncBadge('offline'); return; }
+  updateSyncBadge('syncing');
+  var payload = {
+    id: SYNC_ROW_ID,
+    data: {
+      tasks: tasks,
+      targets: loadTargets(),
+      capacity: loadCapacity(),
+      updatedAt: new Date().toISOString()
+    }
+  };
+  fetch(SUPABASE_URL + '/rest/v1/tasks?on_conflict=id', {
+    method: 'POST',
+    headers: supaHeaders(),
+    body: JSON.stringify(payload)
+  }).then(function(res) {
+    if (!res.ok) throw new Error('sync failed: ' + res.status);
+    updateSyncBadge('synced');
+  }).catch(function(err) {
+    console.error('云端同步失败', err);
+    updateSyncBadge('error');
+  });
+}
+
+function pullFromCloud() {
+  if (!navigator.onLine) { updateSyncBadge('offline'); return Promise.resolve(false); }
+  updateSyncBadge('syncing');
+  return fetch(SUPABASE_URL + '/rest/v1/tasks?id=eq.' + SYNC_ROW_ID + '&select=data', {
+    method: 'GET',
+    headers: supaHeaders()
+  }).then(function(res) {
+    if (!res.ok) throw new Error('fetch failed: ' + res.status);
+    return res.json();
+  }).then(function(rows) {
+    if (rows && rows.length && rows[0].data) {
+      var remote = rows[0].data;
+      var localRaw = localStorage.getItem('tf_tasks');
+      var localUpdatedAt = localStorage.getItem('tf_last_synced_at') || '';
+      // 简单策略：云端有数据就用云端覆盖本地（云端是唯一真相源）
+      if (remote.tasks) {
+        tasks = remote.tasks;
+        localStorage.setItem('tf_tasks', JSON.stringify(tasks));
+      }
+      if (remote.targets) saveTargetsData(remote.targets);
+      if (remote.capacity) localStorage.setItem('tf_capacity', remote.capacity);
+      if (remote.updatedAt) localStorage.setItem('tf_last_synced_at', remote.updatedAt);
+      updateSyncBadge('synced');
+      return true;
+    }
+    updateSyncBadge('synced');
+    return false;
+  }).catch(function(err) {
+    console.error('云端拉取失败', err);
+    updateSyncBadge('error');
+    return false;
+  });
+}
+
 function loadCapacity() { return parseInt(localStorage.getItem('tf_capacity') || '6', 10); }
 function saveCapacity() {
   var v = parseInt(document.getElementById('capacity-input').value, 10);
   if (isNaN(v) || v < 1) v = 1;
   localStorage.setItem('tf_capacity', v);
+  pushToCloud();
 }
 
 function hrsOf(t) {
@@ -586,7 +683,7 @@ function renderAll() {
   var active = tasks.filter(function(t) { return !t.done; });
   var done = tasks.filter(function(t) { return t.done; });
 
-  document.getElementById('count-today').textContent = active.filter(function(t) { return ddlDiff(t) === 0; }).length;
+  document.getElementById('count-today').textContent = active.filter(function(t) { return ddlDiff(t) <= 0; }).length;
   document.getElementById('count-tomorrow').textContent = active.filter(function(t) { return t.deferred; }).length;
   document.getElementById('count-all').textContent = active.length;
   document.getElementById('count-done').textContent = done.length;
@@ -596,7 +693,7 @@ function renderAll() {
 
   var sorted = sortTasks(active);
 
-  var must = sorted.filter(function(t) { return ddlDiff(t) === 0; });
+  var must = sorted.filter(function(t) { return ddlDiff(t) <= 0; });
   var tomorrow = sorted.filter(function(t) { return ddlDiff(t) === 1 && !t.deferred; });
   var week = sorted.filter(function(t) { var d = ddlDiff(t); return d > 1 && d <= 7; });
   var deferred = sorted.filter(function(t) { return t.deferred; });
@@ -606,7 +703,7 @@ function renderAll() {
   var remainHrs = Math.max(0, cap - doneHrs);
 
   // 今日待做（只看今天截止，不含已推迟）
-  var todaySlots = sortTasks(active.filter(function(t) { return ddlDiff(t) === 0 && !t.deferred; }));
+  var todaySlots = sortTasks(active.filter(function(t) { return ddlDiff(t) <= 0 && !t.deferred; }));
   var pendingHrs = 0;
   var slotHtml = '';
 
@@ -629,7 +726,7 @@ function renderAll() {
 
   // 进度条：已完成占总容量的比例
   var fillPct = Math.min(100, Math.round(doneHrs / cap * 100));
-  var fillColor = doneHrs >= cap ? '#1D9E75' : '#378ADD';
+  var fillColor = doneHrs >= cap ? '#24B1B1' : '#007979';
   document.getElementById('capacity-fill').style.width = fillPct + '%';
   document.getElementById('capacity-fill').style.background = fillColor;
   var overload = pendingHrs > remainHrs;
@@ -919,25 +1016,41 @@ window.addEventListener('beforeunload', function(e) {
 
 loadTasks();
 
-// 每天第一次打开自动清掉前一天的deferred标记和actualHrs
-var _today = new Date().toISOString().slice(0, 10);
-var _lastOpen = localStorage.getItem('tf_last_open');
-if (_lastOpen !== _today) {
-  tasks.forEach(function(t) {
-    t.deferred = false;
-    t.actualHrs = null;
-  });
-  saveTasks();
-  localStorage.setItem('tf_last_open', _today);
+function dailyResetAndSeed() {
+  // 每天第一次打开自动清掉前一天的deferred标记和actualHrs
+  var _today = new Date().toISOString().slice(0, 10);
+  var _lastOpen = localStorage.getItem('tf_last_open');
+  if (_lastOpen !== _today) {
+    tasks.forEach(function(t) {
+      t.deferred = false;
+      t.actualHrs = null;
+    });
+    saveTasks();
+    localStorage.setItem('tf_last_open', _today);
+  }
+
+  if (!localStorage.getItem('tf_seeded') && tasks.length === 0) {
+    tasks = [{"id":"t1","name":"整理和sisu沟通的纪要","client":"具尔","deadline":"2026-06-15","q1":"blocking","q2":"core","q3":"expire","q4":"medium","done":true,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t2","name":"个人茶会文案准备","client":"日慈","deadline":"2026-06-18","q1":"blocking","q2":"core","q3":"expire","q4":"small","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t3","name":"项目宣传视频的发布计划","client":"日慈","deadline":"2026-06-19","q1":"maybe","q2":"core","q3":"expire","q4":"medium","done":true,"createdAt":"2026-06-15T04:05:09.143Z","actualHrs":0.5,"doneAt":"2026-06-21T08:32:25.304Z"},{"id":"t4","name":"新手妈妈趣味心理测评反馈","client":"日慈","deadline":"2026-06-15","q1":"blocking","q2":"exit","q3":"expire","q4":"medium","done":true,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t5","name":"整理会议纪要","client":"日慈","deadline":"2026-06-16","q1":"maybe","q2":"exit","q3":"grow","q4":"small","done":true,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t6","name":"需要一个传播方案，能够跟研究的倡导匹配","client":"日慈","deadline":"2026-06-19","q1":"blocking","q2":"core","q3":"grow","q4":"large","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t7","name":"高瑞直播联动调研（选题）","client":"日慈","deadline":"2026-06-17","q1":"blocking","q2":"exit","q3":"grow","q4":"medium","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t8","name":"研究微信公众号官方导流规范","client":"具尔","deadline":"2026-06-16","q1":"maybe","q2":"maintain","q3":"expire","q4":"small","done":true,"createdAt":"2026-06-15T04:05:09.143Z","actualHrs":1,"doneAt":"2026-06-21T08:32:14.150Z"},{"id":"t9","name":"安心妈妈传播侧计划的整理","client":"日慈","deadline":"2026-06-16","q1":"maybe","q2":"exit","q3":"grow","q4":"medium","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t10","name":"评估是否要延期","client":"日慈","deadline":"2026-06-15","q1":"no","q2":"exit","q3":"low","q4":"small","done":true,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t11","name":"出一个「安心妈妈」的传播规范","client":"日慈","deadline":"2026-06-17","q1":"maybe","q2":"exit","q3":"grow","q4":"large","done":true,"createdAt":"2026-06-15T04:05:09.143Z","actualHrs":6,"doneAt":"2026-06-21T08:32:19.589Z"},{"id":"t12","name":"行动营进展同步","client":"日慈","deadline":"2026-06-17","q1":"maybe","q2":"exit","q3":"low","q4":"small","done":true,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t13","name":"整理真姐手头的媒体资源","client":"日慈","deadline":"","q1":"no","q2":"exit","q3":"low","q4":"medium","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"1781497460507","name":"书店工作坊的讨论问题","deadline":"2026-06-15","client":"同语","q1":"blocking","q2":"core","q3":"low","q4":"small","done":true,"createdAt":"2026-06-15T04:24:20.507Z"},{"id":"1781505559298","name":"想一个社区项目的名字","deadline":"2026-06-19","client":"日慈","q1":"maybe","q2":"core","q3":"grow","q4":"medium","done":false,"createdAt":"2026-06-15T06:39:19.298Z"},{"id":"1781505752831","name":"给线下活动物料整理的文档","deadline":"2026-06-16","client":"日慈","q1":"blocking","q2":"core","q3":"low","q4":"medium","done":true,"createdAt":"2026-06-15T06:42:32.831Z","actualHrs":1,"doneAt":"2026-06-21T08:32:09.272Z"},{"id":"1781505779580","name":"投递单向空间的简历","deadline":"2026-06-17","client":"个人","q1":"blocking","q2":"core","q3":"expire","q4":"medium","done":false,"createdAt":"2026-06-15T06:42:59.580Z"}];
+    saveTargetsData({"日慈":20,"具尔":40,"同语":30,"个人":10});
+    localStorage.setItem('tf_capacity', 6);
+    saveTasks();
+    localStorage.setItem('tf_seeded', '1');
+  }
+
+  renderAll();
 }
 
-if (!localStorage.getItem('tf_seeded')) {
-  tasks = [{"id":"t1","name":"整理和sisu沟通的纪要","client":"具尔","deadline":"2026-06-15","q1":"blocking","q2":"core","q3":"expire","q4":"medium","done":true,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t2","name":"个人茶会文案准备","client":"日慈","deadline":"2026-06-18","q1":"blocking","q2":"core","q3":"expire","q4":"small","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t3","name":"项目宣传视频的发布计划","client":"日慈","deadline":"2026-06-19","q1":"maybe","q2":"core","q3":"expire","q4":"medium","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t4","name":"新手妈妈趣味心理测评反馈","client":"日慈","deadline":"2026-06-15","q1":"blocking","q2":"exit","q3":"expire","q4":"medium","done":true,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t5","name":"整理会议纪要","client":"日慈","deadline":"2026-06-16","q1":"maybe","q2":"exit","q3":"grow","q4":"small","done":true,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t6","name":"需要一个传播方案，能够跟研究的倡导匹配","client":"日慈","deadline":"2026-06-19","q1":"blocking","q2":"core","q3":"grow","q4":"large","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t7","name":"高瑞直播联动调研（选题）","client":"日慈","deadline":"2026-06-17","q1":"blocking","q2":"exit","q3":"grow","q4":"medium","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t8","name":"研究微信公众号官方导流规范","client":"具尔","deadline":"2026-06-16","q1":"maybe","q2":"maintain","q3":"expire","q4":"small","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t9","name":"安心妈妈传播侧计划的整理","client":"日慈","deadline":"2026-06-16","q1":"maybe","q2":"exit","q3":"grow","q4":"medium","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t10","name":"评估是否要延期","client":"日慈","deadline":"2026-06-15","q1":"no","q2":"exit","q3":"low","q4":"small","done":true,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t11","name":"出一个「安心妈妈」的传播规范","client":"日慈","deadline":"2026-06-17","q1":"maybe","q2":"exit","q3":"grow","q4":"large","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t12","name":"行动营进展同步","client":"日慈","deadline":"2026-06-17","q1":"maybe","q2":"exit","q3":"low","q4":"small","done":true,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"t13","name":"整理真姐手头的媒体资源","client":"日慈","deadline":"","q1":"no","q2":"exit","q3":"low","q4":"medium","done":false,"createdAt":"2026-06-15T04:05:09.143Z"},{"id":"1781497460507","name":"书店工作坊的讨论问题","deadline":"2026-06-15","client":"同语","q1":"blocking","q2":"core","q3":"low","q4":"small","done":true,"createdAt":"2026-06-15T04:24:20.507Z"},{"id":"1781505559298","name":"想一个社区项目的名字","deadline":"2026-06-19","client":"日慈","q1":"maybe","q2":"core","q3":"grow","q4":"medium","done":false,"createdAt":"2026-06-15T06:39:19.298Z"},{"id":"1781505752831","name":"给线下活动物料整理的文档","deadline":"2026-06-16","client":"日慈","q1":"blocking","q2":"core","q3":"low","q4":"medium","done":false,"createdAt":"2026-06-15T06:42:32.831Z"},{"id":"1781505779580","name":"投递单向空间的简历","deadline":"2026-06-17","client":"个人","q1":"blocking","q2":"core","q3":"expire","q4":"medium","done":false,"createdAt":"2026-06-15T06:42:59.580Z"}];
-  saveTasks();
-  localStorage.setItem('tf_seeded', '1');
-}
+// 先尝试从云端拉取最新数据，拉取完成（无论成功失败）后再走每日重置/seed/渲染
+pullFromCloud().then(function() {
+  dailyResetAndSeed();
+}).catch(function() {
+  dailyResetAndSeed();
+});
 
-renderAll();
+// 定期轮询云端，实现多设备间的准实时同步（每30秒检查一次）
+setInterval(function() {
+  if (!_dirty) pullFromCloud().then(function(changed) { if (changed) renderAll(); });
+}, 30000);
 </script>
 </body>
 </html>
